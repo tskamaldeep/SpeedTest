@@ -17,10 +17,11 @@ let downloadmetadata = new Map([
 ]);
 
 // For the progress indicator.
-let curProgress = new Map([["progressFloat", 0.0], ["progressInt", 0]]);
+let curProgress = new Map([["progressFloat", parseFloat("0")], ["progressInt", parseInt("0")]]);
 let totalSize = 0;
 
-let fetchResponseTime = function (eventtype) {
+let fetchResponseTime = function
+  (eventtype) {
   let timestr = new Date();
 
   switch (eventtype.type) {
@@ -46,7 +47,9 @@ let fetchResponseTime = function (eventtype) {
 }
 
 let setProgressPercentage = function (bytesloaded, bytestotal) {
-  let progress = Math.min((bytesloaded * 100 / bytestotal).toFixed(2), 100.00);
+
+  let mbytesloaded = isNaN(bytesloaded) ? 0 : bytesloaded;
+  let progress = Math.min((mbytesloaded * 100 / bytestotal).toFixed(2), 100.00);
   curProgress.set("progressFloat", progress);
   curProgress.set("progressInt", Math.floor(progress));
 };
@@ -96,7 +99,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
 
 
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.total);
-      console.log("Progress at Start: ", curProgress.get("progressFloat"));
+      console.log("Progress at Start: ", curProgress.get("progressFloat").toString());
     }
 
     httpRequest.onloadend = function (ev) {
@@ -109,7 +112,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
       clearInterval(setProgressPercentage);
 
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded + " - " + ev.total);
-      console.log("Progress at Load End: ", curProgress.get("progressFloat"));
+      console.log("Progress at Load End: ", curProgress.get("progressFloat").toString());
     }
 
     httpRequest.onprogress = function (ev) {
@@ -120,7 +123,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
       setProgressPercentage(ev.loaded, ev.total);
 
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded);
-      console.log("Progress at instant: ", responseTime["progressTime"].pop().toString(), " ", curProgress.get("progressFloat"));
+      console.log("Progress at instant: ", responseTime["progressTime"].pop().toString(), " ", curProgress.get("progressFloat").toString());
     }
 
     httpRequest.onabort = function (ev) {
@@ -133,7 +136,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
       clearInterval(setProgressPercentage);
 
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded + " - " + ev.total);
-      console.log("Progress on aborting download: ", curProgress.get("progressFloat"));
+      console.log("Progress on aborting download: ", curProgress.get("progressFloat").toString());
 
       //Should we?
       httpRequest.abort();
@@ -149,7 +152,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
       clearInterval(setProgressPercentage);
 
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded);
-      console.log("Progress on download error : ", curProgress.get("progressFloat"));
+      console.log("Progress on download error : ", curProgress.get("progressFloat").toString());
     }
 
     httpRequest.send();

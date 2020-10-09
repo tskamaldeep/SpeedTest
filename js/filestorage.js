@@ -36,9 +36,5 @@ let createStore = function (storename, version = 1) {
 
   return idbstore;
 }
-//
-// let storeFileHandle = function (fileName) {
-//   var IDBHandle =
-// }
 
 

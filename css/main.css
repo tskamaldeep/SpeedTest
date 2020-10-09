@@ -282,8 +282,9 @@ textarea {
   text-align: center;
   font-size: small;
   align-content: end;
-  color: blue;
+  color: black;
   border: none;
+  background-color: lightsteelblue;
   text-align: right;
 }
 
@@ -315,4 +316,8 @@ textarea {
   margin-right: 20px;
   width: 120px;
   height: 100px;
+}
+
+.speedTests {
+  background-color: lightsteelblue;
 }

@@ -4,7 +4,6 @@ import * as testrequest from './speedtestrequest.js';
 import {curProgress} from "./speedtestrequest.js";
 
 let downloadURL = "https://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/dash/tears-of-steel-video_eng=751000-9600.dash";
-let urlscheme = downloadURL.split("://")[0];
 
 // Test Status Flags
 const TEST_STARTED = 1;
@@ -20,7 +19,6 @@ const TEST_PROGRESS_MIN = 0;
 const TEST_PROGRESS_MAX = Number(100).toFixed(2);
 
 let getProgressPercentage = function (speedtest) {
-  console.log("Current Progress: ", curProgress.get("progressFloat"));
   return curProgress.get("progressFloat");
 };
 
@@ -32,7 +30,7 @@ let setProgressPercentage = function (speedtest, downloadedSize) {
     return;
   }
 
-  let dsize = downloadedSize === NaN ? 0 : downloadedSize;
+  let dsize = isNaN(downloadedSize) ? 0 : downloadedSize;
   let totalsize = testrequest.totalSize;
   testrequest.setProgressPercentage(dsize, totalsize);
 
@@ -49,14 +47,15 @@ let setResponseTimesFromTestResult = function (speedtest, newresponsetime) {
   // set and return this value.
   let iterresult = {};
 
-  let downloadtime = ((newresponsetime.loadEndTime > newresponsetime.loadStartTime) ? (newresponsetime.loadEndTime - newresponsetime.loadStartTime) :
+  let downloadtime = ((newresponsetime.loadEndTime >= newresponsetime.loadStartTime) ? (newresponsetime.loadEndTime - newresponsetime.loadStartTime) :
     ((newresponsetime.abortTime > newresponsetime.loadStartTime) ? (newresponsetime.abortTime - newresponsetime.loadStartTime) : 0));
+  console.log("Download Time: ", downloadtime);
 
   try {
     let iterations = speedtest.get("iterations");
     let iterationsStr = iterations.toString();
 
-    // console.log("Median: ", speedtest.get("testResults"), speedtest.get("testResults").get((iterations - 1).toString()).get("medianResponseTime"));
+    console.log("Median: ", speedtest.get("testResults"), speedtest.get("testResults").get((iterations - 1).toString()).get("medianResponseTime"));
     let currentmediantime = (iterations === 1) ? 0 : (speedtest.get("testResults").get((iterations - 1).toString()).get("medianResponseTime"));
     let currentpercentile90time = (iterations === 1) ? 0 : (speedtest.get("testResults").get((iterations - 1).toString()).get("percentile90time"));
 
@@ -94,7 +93,7 @@ let setResponseTimesFromTestResult = function (speedtest, newresponsetime) {
     return iterresult;
 
   } catch (e) {
-    console.error(logstring.speedTestLogString(timestr) + e.message.toString());
+    console.error(logstring.speedTestLogString(timestr) + e.message);
     return iterresult;
   }
 };
@@ -296,10 +295,6 @@ let getSpeedTestResults = function (speedtest, iteration) {
     console.error(logstring.speedTestLogString(timestr) + "Error fetching test results for testID ", speedtest["testID"], " iteration: ", speedtest[iteration]);
     return null;
   }
-}
-
-let getSpeedTestResultsAsJSON = function (speedtest, iteration) {
-  return JSON.stringify(getSpeedTestResults(speedtest, iteration));
 }
 
 export {
