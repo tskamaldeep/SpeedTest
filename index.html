@@ -32,7 +32,7 @@
 <h3 class="centertitle">Start your Speed Test Here.</h3>
 <script src="js/vendor/modernizr-3.11.2.min.js"></script>
 
-<div>
+<div class="testpanel">
   <div id="dloadprogress" class="dloadprogress">
     <label for="progressbar">Download Progress: </label>
     <progress id="progressbar" max="100.00">Progress</progress>
@@ -49,7 +49,9 @@
   <!--      </div>-->
   <!--    </fieldset>-->
   <!--  </div>-->
-
+  <div>
+    <textarea readonly id="responsetimes" class="responsetimescss"></textarea>
+  </div>
   <div id="teststatusoptions" class="teststatusoptions">
     <button id="startTest">Start Test</button>
     <button id="stopTest">Stop Test</button>
@@ -89,9 +91,12 @@
 
   // Text area
   let textarea = document.querySelector('#testresults');
+  let responseTimes = document.querySelector('#responsetimes');
+
   let setTestResults = function () {
     // Initialize the iterator.
     textarea.innerHTML += "\nIteration: " + iterCount.toString() + "\n";
+    responseTimes.innerHTML = "";
 
     let testresults = api.getSpeedTestResults(iterCount);
     for (let [mapkey, mapval] of testresults) {
@@ -99,6 +104,9 @@
         if (mapvalattrkey === "medianResponseTime" || mapvalattrkey === "percentile90time") {
           console.log("About to print: ", mapvalattrkey, " ", mapvalattrval);
           textarea.innerHTML += mapvalattrkey + ": " + mapvalattrval + "\n";
+        }
+        else if (mapvalattrkey == "downloadResults") {
+          responseTimes.innerHTML += mapvalattrval;
         }
       }
     }
@@ -111,6 +119,8 @@
     textarea.innerHTML = "";
     // Initialize the text area.
     textarea.innerHTML = api.testInstance.get('testID') + "\n";
+
+    responseTimes.innerHTML = "";
   }
 
   let startSpeedTest = function () {

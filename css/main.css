@@ -262,9 +262,17 @@ textarea {
   }
 }
 
-.teststatusoptions, .exportoptions, .dloadprogress, .centertitle  {
+.teststatusoptions, .exportoptions, .dloadprogress, .centertitle, .testpanel, .responsetimescss  {
   align-content: center;
   text-align: center;
+}
+
+.exportoptions, .responsetimescss {
+  align-content: center;
+  text-align: left;
+  font-family: Helvetica;
+  font-size: small;
+  font-weight: bold;
 }
 
 .centertitle {
@@ -288,19 +296,20 @@ textarea {
   text-align: right;
 }
 
+.responsetimescss {
+  margin-top: 50px;
+  width: 400px;
+  height: 200px;
+}
+
 .teststatusoptions {
-  margin-top: 120px;
+  margin-top: 100px;
 }
 
 .exportoptions {
-  margin-top: 140px;
+  margin-top: 50px;
   width: 400px;
   height: 200px;
-  align-content: center;
-  text-align: left;
-  font-family: Helvetica;
-  font-size: small;
-  font-weight: bold;
 }
 
 .exportButton {
@@ -316,6 +325,12 @@ textarea {
   margin-right: 20px;
   width: 120px;
   height: 100px;
+}
+
+.testpanel {
+  border: 2px solid black;
+  width: 500px;
+  margin-left: 32%;
 }
 
 .speedTests {
