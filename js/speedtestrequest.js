@@ -143,9 +143,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded + " - " + ev.total);
       console.log("Progress on aborting download: ", curProgress.get("progressFloat").toString());
 
-      httpRequest.removeEventListener(ev);
-      httpRequest = null;
-
+      httpRequest.abort();
     }
 
     httpRequest.onerror = function (ev) {
@@ -160,8 +158,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded);
       console.log("Progress on download error : ", curProgress.get("progressFloat").toString());
 
-      httpRequest.removeEventListener(ev);
-      httpRequest = null;
+      httpRequest.abort();
 
     }
 
