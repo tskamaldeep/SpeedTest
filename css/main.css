@@ -262,17 +262,13 @@ textarea {
   }
 }
 
-.teststatusoptions, .exportoptions, .dloadprogress, .centertitle, .testpanel, .responsetimescss  {
-  align-content: center;
-  text-align: center;
+.speedTests {
+  background-color: lightsteelblue;
 }
 
-.exportoptions, .responsetimescss {
+.teststatusoptions, .exportoptions, .dloadprogress, .centertitle, .testpanel  {
   align-content: center;
-  text-align: left;
-  font-family: Helvetica;
-  font-size: small;
-  font-weight: bold;
+  text-align: center;
 }
 
 .centertitle {
@@ -281,6 +277,28 @@ textarea {
 
 .dloadprogress {
   margin-top: 80px;
+}
+
+.responsetimeslist {
+  border: 2px solid black;
+  margin-left: 5%;
+  width: 100px;
+  height: max-content;
+}
+
+.responsetimes {
+  list-style: square;
+  list-style-type: square;
+  list-style-position: inside;
+  border: 2px solid black;
+  background-color: #555555;
+}
+
+.responsetimescss {
+  width: max-content;
+}
+
+.dloadprogress {
   border: #888888;
 }
 
@@ -296,10 +314,11 @@ textarea {
   text-align: right;
 }
 
-.responsetimescss {
-  margin-top: 50px;
-  width: 400px;
-  height: 200px;
+.testpanel {
+  margin-top: 30px;
+  border: 2px solid black;
+  width: 500px;
+  margin-left: 30%;
 }
 
 .teststatusoptions {
@@ -310,6 +329,11 @@ textarea {
   margin-top: 50px;
   width: 400px;
   height: 200px;
+  align-content: center;
+  text-align: left;
+  font-family: Helvetica;
+  font-size: small;
+  font-weight: bold;
 }
 
 .exportButton {
@@ -318,21 +342,4 @@ textarea {
   alignment: right;
   font-size: small;
   font-weight: bold;
-}
-
-.exportedFilesList {
-  margin-top: 80px;
-  margin-right: 20px;
-  width: 120px;
-  height: 100px;
-}
-
-.testpanel {
-  border: 2px solid black;
-  width: 500px;
-  margin-left: 32%;
-}
-
-.speedTests {
-  background-color: lightsteelblue;
 }

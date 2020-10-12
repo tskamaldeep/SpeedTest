@@ -16,11 +16,7 @@ let startSpeedTest = function () {
 }
 
 let stopSpeedTest = function (iterCount) {
-  let testresult = declarations.stopSpeedTest(testInstance);
-  let currentResultsObj = testInstance.get("testResults");
-
-  // Add the iteration result to the set of results.
-  currentResultsObj.set(iterCount.toString(), testresult);
+  declarations.stopSpeedTest(testInstance);
 
   // Dispatch the event to abort download.
   testRequest.dispatchEvent(new ProgressEvent("abort"));
@@ -34,9 +30,7 @@ let resetSpeedTest = function (iterCount) {
 
   // Then reset the test instance.
   // Also handles creating a new test instance.
-  let testresult = declarations.resetSpeedTest(testInstance);
-  let currentResultsObj = testInstance.get("testResults");
-  currentResultsObj.set(iterCount.toString(), testresult);
+  declarations.resetSpeedTest(testInstance);
 
   // Dispatch the event before resetting download.
   testRequest.dispatchEvent(new ProgressEvent("abort"));
@@ -62,8 +56,8 @@ let setProgressPercentage = function (downloadedSize) {
 }
 
 let getSpeedTestResults = function (iteration = -1) {
-  let testresults = declarations.getSpeedTestResults(testInstance, iteration);
-  return testresults;
+  let results = declarations.getSpeedTestResults(testInstance, iteration);
+  return results;
 
 }
 

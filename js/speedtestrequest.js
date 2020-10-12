@@ -2,11 +2,13 @@
 
 import * as logstring from './logstring.js';
 
+let requestStartTime = 0;
+
 let responseTime = {};
 responseTime.loadStartTime = 0;
 responseTime.loadEndTime = 0;
 responseTime.abortTime = 0;
-responseTime.progressTime = new Array(100);
+responseTime.progressTime = new Array();
 responseTime.errorReportTime = 0;
 
 let downloadmetadata = new Map([
@@ -20,26 +22,25 @@ let downloadmetadata = new Map([
 let curProgress = new Map([["progressFloat", parseFloat("0")], ["progressInt", parseInt("0")]]);
 let totalSize = 0;
 
-let fetchResponseTime = function
-  (eventtype) {
-  let timestr = new Date();
+let fetchResponseTime = function (eventtype) {
+  let reference = requestStartTime;
 
   switch (eventtype.type) {
     case ('loadstart'):
-      responseTime.loadStartTime = ((new Date()).getSeconds()) * 1000;
+      responseTime.loadStartTime = (new Date().getSeconds()) * 1000 - reference;
       break;
     case('loadend'):
-      responseTime.loadEndTime = ((new Date()).getSeconds()) * 1000;
+      responseTime.loadEndTime = ((new Date()).getSeconds()) * 1000 - reference;
       break;
     case('progress'):
-      let totalSeconds = ((new Date()).getSeconds()) * 1000;
+      let totalSeconds = ((new Date()).getSeconds()) * 1000 - reference;
       responseTime.progressTime.push(totalSeconds);
       break;
     case ('abort'):
-      responseTime.abortTime = ((new Date()).getSeconds()) * 1000;
+      responseTime.abortTime = ((new Date()).getSeconds()) * 1000 - reference;
       break;
     case('error'):
-      responseTime.errorReportTime = ((new Date()).getSeconds()) * 1000;
+      responseTime.errorReportTime = ((new Date()).getSeconds()) * 1000 - reference;
       break;
   }
 
@@ -69,6 +70,9 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
     // set the credentials.
     httpRequest.withCredentials = false;
 
+    // For response time computations.
+    requestStartTime = new Date().getSeconds() * 1000;
+
     httpRequest.open('GET', urlstring, true);
     // httpRequest.setRequestHeader('Access-Control-Allow-Headers', '*');
     // httpRequest.setRequestHeader('content-type', 'video/mp4');
@@ -81,12 +85,12 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     // Set the cache header accordingly.
-    if (cacheresource) {
-      httpRequest.setRequestHeader('cache-control', 'no-cache, max-age=0');
-      // httpRequest.setRequestHeader('pragma', 'no-cache');
-    } else {
-      httpRequest.setRequestHeader('cache-control', 'no-store');
-    }
+    // if (cacheresource) {
+    //   httpRequest.setRequestHeader('cache-control', 'no-cache, max-age=0');
+    //   // httpRequest.setRequestHeader('pragma', 'no-cache');
+    // } else {
+    //   httpRequest.setRequestHeader('cache-control', 'no-store');
+    // }
 
     // add the event listeners.
     httpRequest.onloadstart = function (ev) {
@@ -113,6 +117,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
 
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded + " - " + ev.total);
       console.log("Progress at Load End: ", curProgress.get("progressFloat").toString());
+
     }
 
     httpRequest.onprogress = function (ev) {
@@ -122,8 +127,8 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
       // Progress interval updation.
       setProgressPercentage(ev.loaded, ev.total);
 
+      console.log("Loaded: ", ev.loaded, "\n",   "Total; ", ev.total);
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded);
-      console.log("Progress at instant: ", responseTime["progressTime"].pop().toString(), " ", curProgress.get("progressFloat").toString());
     }
 
     httpRequest.onabort = function (ev) {
@@ -138,8 +143,9 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded + " - " + ev.total);
       console.log("Progress on aborting download: ", curProgress.get("progressFloat").toString());
 
-      //Should we?
-      httpRequest.abort();
+      httpRequest.removeEventListener(ev);
+      httpRequest = null;
+
     }
 
     httpRequest.onerror = function (ev) {
@@ -153,10 +159,18 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
 
       console.log(ev.type + " - " + ev.timeStamp + " - " + ev.currentTarget + " - " + ev.toString() + " - " + ev.loaded);
       console.log("Progress on download error : ", curProgress.get("progressFloat").toString());
+
+      httpRequest.removeEventListener(ev);
+      httpRequest = null;
+
     }
+
+    // Set on the metadata object.
+    downloadmetadata.set("requestStartTime", requestStartTime);
 
     httpRequest.send();
     return httpRequest;
+
   } catch (e) {
     console.error(logstring.speedTestLogString(timestr) + "Error sending a URLRequest for speedtest download results");
     console.error(e.message.toLocaleString());
@@ -167,4 +181,4 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
   }
 }
 
-export {sendURLRequest, responseTime, downloadmetadata, curProgress, totalSize, setProgressPercentage};
+export {sendURLRequest, requestStartTime, responseTime, downloadmetadata, curProgress, totalSize, setProgressPercentage};

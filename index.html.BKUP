@@ -1,0 +1,238 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title>Vimeo Speed Test</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <meta name="theme-color" content="#fafafa">
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/logstring.js"></script>
+  <!--  <script type="module" crossorigin="anonymous" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+  <!--  <script type="module" crossorigin="anonymous" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>-->
+  <!--  <link rel="stylesheet" crossorigin="anonymous" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css"/>-->
+</head>
+<body id="speedtests" class="speedTests">
+<!-- Add your site or application content here -->
+<h3 class="centertitle">Start your Speed Test Here.</h3>
+<script src="js/vendor/modernizr-3.11.2.min.js"></script>
+
+<table>
+  <colgroup span="3">
+    <tr class="sectionrow">
+      <td>
+        <details id="responsetimes" class="responsetimescss">
+          <summary class="summarycss">Download Stats</summary>
+        </details>
+      </td>
+      <td>
+        <div class="testpanel">
+          <div id="dloadprogress" class="dloadprogress">
+            <label for="progressbar">Download Progress: </label>
+            <progress id="progressbar" max="100.00">Progress</progress>
+            <br/>
+            <label for="percentval"></label>
+            <input type="text" id="percentval" class="percentlabel"/>
+          </div>
+          <!--  <div id="accordion" class="exportedfiles" >-->
+          <!--    <label for="filelist"> List of exported files </label>-->
+          <!--    <fieldset id="filelist">-->
+          <!--      &lt;!&ndash; make the text into a file type &ndash;&gt;-->
+          <!--      <div>-->
+          <!--        <input type="text" value=${document.getElementByID('textarea').innerHTML}"/>-->
+          <!--      </div>-->
+          <!--    </fieldset>-->
+          <!--  </div>-->
+          <!--        <div>-->
+          <!--          <textarea readonly id="responsetimes" class="responsetimescss"></textarea>-->
+          <!--        </div>-->
+          <div id="teststatusoptions" class="teststatusoptions">
+            <button id="startTest">Start Test</button>
+            <button id="stopTest">Stop Test</button>
+            <button id="resetTest">Reset Test</button>
+            <div>
+              <textarea readonly id="testresults" class="exportoptions"></textarea>
+            </div>
+            <div>
+              <button id="exportButton" class="exportButton">Export As JSON Output</button>
+            </div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <details id="responsetimes3" class="responsetimescss3">
+          <summary class="summarycss3">Download Stats</summary>
+        </details>
+      </td>
+    </tr>
+  </colgroup>
+</table>
+
+
+<script type="module">
+
+  import * as api from './js/main.js';
+
+  // Test options
+  let startTestButton = document.querySelector('#startTest');
+  let stopTestButton = document.querySelector('#stopTest');
+  let resetTestButton = document.querySelector('#resetTest');
+  let exportButton = document.querySelector('#exportButton');
+  let exportedFilesList = document.querySelector('#exportedfileslist');
+
+  // Count iterations for a test sequence.
+  let iterCount = 0;
+
+  // Progress bar
+  let progressbar = document.querySelector('#progressbar');
+  let percentval = document.querySelector('#percentval');
+  let setProgress = function () {
+    let progressFloat = api.getProgressPercentageFloat();
+    let percentvalstr = (isNaN(progressFloat) || progressFloat === 0) ? "0" : progressFloat.toString();
+    progressbar.setAttribute("value", progressFloat);
+    percentval.setAttribute("value", percentvalstr);
+  }
+
+  // Text area
+  let textarea = document.querySelector('#testresults');
+  let responseTimes = document.querySelector('#responsetimes');
+
+  let setTestResults = function () {
+    // Initialize the iterator.
+    textarea.innerHTML += "\nIteration: " + iterCount.toString() + "\n";
+    responseTimes.innerHTML = "";
+
+    let testresults = api.getSpeedTestResults(iterCount);
+    for (let [mapkey, mapval] of testresults) {
+      for (let [mapvalattrkey, mapvalattrval] of mapval) {
+        if (mapvalattrkey === "medianResponseTime" || mapvalattrkey === "percentile90time") {
+          console.log("About to print: ", mapvalattrkey, " ", mapvalattrval);
+          textarea.innerHTML += mapvalattrkey + ": " + mapvalattrval + "\n";
+        } else if (mapvalattrkey == "downloadResults") {
+          responseTimes.innerHTML += mapvalattrval;
+        }
+      }
+    }
+
+    // Stop the progress bar from updating. ????
+    progressbar.removeAttribute("value");
+  }
+
+  let clearTestResults = function () {
+    textarea.innerHTML = "";
+    // Initialize the text area.
+    textarea.innerHTML = api.testInstance.get('testID') + "\n";
+
+    responseTimes.innerHTML = "";
+  }
+
+  let startSpeedTest = function () {
+    iterCount += 1;
+    api.startSpeedTest();
+  }
+
+  let stopSpeedTest = function () {
+    dispatchEvent(new ProgressEvent("abort"));
+    api.stopSpeedTest(iterCount);
+  }
+
+  let resetSpeedTest = function () {
+    dispatchEvent(new ProgressEvent("abort", api.testRequest));
+    api.resetSpeedTest(iterCount);
+
+    // Reset the count.
+    iterCount = 0;
+    clearTestResults();
+  }
+
+  let exportResultsAsJSON = function () {
+    let jsonblob = api.getAllSpeedTestResultsAsJSON();
+    console.log(jsonblob);
+    // Have a fileWriter.
+    // let exportedFilesList = document.querySelector('#exportedfileslist');
+    //
+    // customElements.define("inputnode", HTMLInputElement);
+    // let inputnode = document.createElement()
+    // inputnode.innerHTML = jsonblob.toString();
+    // exportedFilesList.insertAdjacentElement('beforeend', inputnode);
+  }
+
+  let addTestActivationEventListeners = function (add = true) {
+    if (add) {
+      startTestButton.addEventListener('click', toggleTestStatusButtons);
+      stopTestButton.addEventListener('click', toggleTestStatusButtons);
+      resetTestButton.addEventListener('click', toggleTestStatusButtons);
+      exportButton.addEventListener('click', exportResultsAsJSON);
+    } else {
+      startTestButton.removeEventListener('click', toggleTestStatusButtons);
+      stopTestButton.removeEventListener('click', toggleTestStatusButtons);
+      resetTestButton.removeEventListener('click', toggleTestStatusButtons);
+      exportButton.removeEventListener('click', exportResultsAsJSON);
+    }
+  }
+
+  // Create a new instance to start on load.
+  let newTestObj = api.createNewTest();
+  textarea.innerHTML = api.testInstance.get('testID') + "\n";
+
+  // Add the event listeners.
+  startTestButton.addEventListener('click', startSpeedTest);
+  stopTestButton.addEventListener('click', stopSpeedTest);
+  resetTestButton.addEventListener('click', resetSpeedTest);
+  stopTestButton.addEventListener('click', setTestResults);
+
+  let requestURL = newTestObj.get("downloadMetadata").get("requestURL");
+
+  let toggleTestStatusButtons = function (listener) {
+    switch (listener.target) {
+      case (startTestButton):
+        stopTestButton.disabled = false;
+        resetTestButton.disabled = false;
+        startTestButton.disabled = true;
+
+        // Progress bar updation.
+        setInterval(setProgress, 500);
+
+        break;
+
+      case(stopTestButton):
+        startTestButton.disabled = false;
+        resetTestButton.disabled = false;
+        stopTestButton.disabled = true;
+
+        // Progress bar updation.
+        clearInterval(setProgress);
+        break;
+
+      case(resetTestButton):
+        // Reset the test sequence, through the event listener.
+        startTestButton.disabled = false;
+        stopTestButton.disabled = true;
+        resetTestButton.disabled = true;
+
+        // Progress bar updation.
+        clearInterval(setProgress);
+        break;
+    }
+  };
+
+  // Add the toggle button state event listeners.
+  addTestActivationEventListeners(true);
+
+</script>
+</body>
+</html>
