@@ -24,23 +24,29 @@ let totalSize = 0;
 
 let fetchResponseTime = function (eventtype) {
   let reference = requestStartTime;
+  let timestr = new Date();
 
   switch (eventtype.type) {
     case ('loadstart'):
-      responseTime.loadStartTime = (new Date().getSeconds()) * 1000 - reference;
+      timestr = new Date();
+      responseTime.loadStartTime = ((timestr.getMinutes() * 60) + timestr.getSeconds()) * 1000 - reference;
       break;
     case('loadend'):
-      responseTime.loadEndTime = ((new Date()).getSeconds()) * 1000 - reference;
+      timestr = new Date();
+      responseTime.loadEndTime = ((timestr.getMinutes() * 60) + timestr.getSeconds()) * 1000 - reference;
       break;
     case('progress'):
-      let totalSeconds = ((new Date()).getSeconds()) * 1000 - reference;
+      timestr = new Date();
+      let totalSeconds = ((timestr.getMinutes() * 60) + timestr.getSeconds()) * 1000 - reference;
       responseTime.progressTime.push(totalSeconds);
       break;
     case ('abort'):
-      responseTime.abortTime = ((new Date()).getSeconds()) * 1000 - reference;
+      timestr = new Date();
+      responseTime.abortTime = ((timestr.getMinutes() * 60) + timestr.getSeconds()) * 1000 - reference;
       break;
     case('error'):
-      responseTime.errorReportTime = ((new Date()).getSeconds()) * 1000 - reference;
+      timestr = new Date();
+      responseTime.errorReportTime = ((timestr.getMinutes() * 60) + timestr.getSeconds()) * 1000 - reference;
       break;
   }
 
@@ -60,6 +66,7 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
   let navigatorobj = window.navigator;
   let useragent = navigatorobj.userAgent;
   let timestr = new Date();
+  let referenceTime = ((timestr.getMinutes() * 60) + timestr.getSeconds()) * 1000;
 
   try {
 
@@ -71,7 +78,8 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
     httpRequest.withCredentials = false;
 
     // For response time computations.
-    requestStartTime = new Date().getSeconds() * 1000;
+    requestStartTime = referenceTime;
+    console.log("Request Start Time: ", requestStartTime);
 
     httpRequest.open('GET', urlstring, true);
     // httpRequest.setRequestHeader('Access-Control-Allow-Headers', '*');
@@ -163,7 +171,8 @@ let sendURLRequest = function (urlstring, cacheresource = true) {
     }
 
     // Set on the metadata object.
-    downloadmetadata.set("requestStartTime", requestStartTime);
+    let currentTime = ((timestr.getMinutes() * 60) + timestr.getSeconds()) * 1000 - requestStartTime;
+    downloadmetadata.set("requestStartTime", currentTime);
 
     httpRequest.send();
     return httpRequest;

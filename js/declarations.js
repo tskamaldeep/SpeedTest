@@ -47,17 +47,16 @@ let setResponseTimesFromTestResult = function (speedtest, newresponsetime) {
     // set and return this value.
     let iterresult = {};
 
-    let downloadtime = ((newresponsetime.loadEndTime >= newresponsetime.loadStartTime) ? (newresponsetime.loadEndTime - newresponsetime.loadStartTime) :
-        ((newresponsetime.abortTime > newresponsetime.loadStartTime) ? (newresponsetime.abortTime - newresponsetime.loadStartTime) : 0));
+    let downloadtime = ((newresponsetime.loadEndTime >= newresponsetime.loadStartTime) ? (newresponsetime.loadEndTime) :
+        ((newresponsetime.abortTime >= newresponsetime.loadStartTime) ? (newresponsetime.abortTime) : (newresponsetime.errorReportTime)));
     console.log("Download Time: ", downloadtime);
 
     try {
         let iterations = speedtest.get("iterations");
         let iterationsStr = (iterations - 1).toString();
 
-        // console.log("Median: ", speedtest.get("testResults"), speedtest.get("testResults").get(iterationsStr).get("medianResponseTime"));
-        let currentmediantime = (iterations === 1) ? 0 : (speedtest.get("testResults").get(iterationsStr).get("medianResponseTime"));
-        let currentpercentile90time = (iterations === 1) ? 0 : (speedtest.get("testResults").get(iterationsStr).get("percentile90time"));
+        let currentmediantime = (iterations === 1) ? downloadtime : (speedtest.get("testResults").get(iterationsStr).get("medianResponseTime"));
+        let currentpercentile90time = (iterations === 1) ? downloadtime : (speedtest.get("testResults").get(iterationsStr).get("percentile90time"));
 
         // Set the result, at the least, with the current values in the try/catch.
         iterresult.medianresponsetime = currentmediantime;
@@ -68,7 +67,7 @@ let setResponseTimesFromTestResult = function (speedtest, newresponsetime) {
         console.log("Current Median Time: ", currentmediantime, " ", "New Median Time: ", newmediantime);
 
         // 90th percentile time
-        let newpercentile90time = (iterations === 1) ? newmediantime : currentpercentile90time;
+        let newpercentile90time = (iterations === 1) ? downloadtime : currentpercentile90time;
         let modifiedpercentile = 0.9 * speedtest.get("iterations");
 
         // 14 samples 90th percentile = 30.42/40
@@ -78,12 +77,12 @@ let setResponseTimesFromTestResult = function (speedtest, newresponsetime) {
         // 0.84 = >30.42
         // 0.9 =>?
 
-        if (downloadtime > currentpercentile90time) {
+        if (downloadtime >= currentpercentile90time) {
             modifiedpercentile = 0.9 * (speedtest.get("iterations") + 1);
-            newpercentile90time = (0.9 * newpercentile90time) / modifiedpercentile;
+            newpercentile90time = ((0.9 * newpercentile90time) / modifiedpercentile).toFixed(2);
         } else {
             modifiedpercentile = (modifiedpercentile + 1) / (speedtest.get("iterations") + 1);
-            newpercentile90time = (0.9 * newpercentile90time) / modifiedpercentile;
+            newpercentile90time = ((0.9 * newpercentile90time) / modifiedpercentile).toFixed(2);
         }
 
         iterresult.medianresponsetime = newmediantime;
