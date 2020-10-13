@@ -58,7 +58,7 @@
 <script type="module">
 
     import * as api from './js/main.js';
-    import * as logstring from './js/logstring.js'
+    import * as logstring from './js/logstring.js';
 
     // Test options
     let startTestButton = document.querySelector('#startTest');
@@ -143,6 +143,8 @@
     let exportResultsAsJSON = function () {
         let jsonblob = api.getAllSpeedTestResultsAsJSON();
         console.log(jsonblob);
+
+        api.saveContentsToFile();
 
         // Have a fileWriter.
         // let exportedFilesList = document.querySelector('#exportedfileslist');
