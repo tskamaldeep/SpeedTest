@@ -58,6 +58,7 @@
 <script type="module">
 
     import * as api from './js/main.js';
+    import * as logstring from './js/logstring.js'
 
     // Test options
     let startTestButton = document.querySelector('#startTest');
@@ -85,7 +86,6 @@
     let setTestResults = function () {
         // Initialize the iterator.
         textarea.innerHTML += "\nIteration: " + iterCount.toString() + "\n";
-        // textarea.innerHTML += logstring.speedTestLogString(new Date());
 
        try {
            let testresults = api.getSpeedTestResults(iterCount);
@@ -115,9 +115,12 @@
     }
 
     let clearTestResults = function () {
+        let timestr = new Date();
         textarea.innerHTML = "";
         // Initialize the text area.
         textarea.innerHTML = api.testInstance.get('testID') + "\n";
+        textarea.innerHTML += logstring.speedTestLogString(new Date()) + "Download Tests\n\n";
+
     }
 
     let startSpeedTest = function () {
@@ -170,6 +173,7 @@
     // Create a new instance to start on load.
     let newTestObj = api.createNewTest();
     textarea.innerHTML = api.testInstance.get('testID') + "\n";
+    textarea.innerHTML += logstring.speedTestLogString(new Date()) + "Download Tests\n\n";
 
     // Add the event listeners.
     startTestButton.addEventListener('click', startSpeedTest);
