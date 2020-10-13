@@ -67,8 +67,8 @@ let setResponseTimesFromTestResult = function (speedtest, newresponsetime) {
         console.log("Current Median Time: ", currentmediantime, " ", "New Median Time: ", newmediantime);
 
         // 90th percentile time
-        let newpercentile90time = (iterations === 1) ? downloadtime : currentpercentile90time;
-        let modifiedpercentile = 0.9 * speedtest.get("iterations");
+        let newpercentile90time = currentpercentile90time;
+        let modifiedpercentile = (0.9 * (iterations - 1))/iterations;
 
         // 14 samples 90th percentile = 30.42/40
         // 15th sample > 30.42
@@ -76,14 +76,14 @@ let setResponseTimesFromTestResult = function (speedtest, newresponsetime) {
         // 12.6 + 2.4 = 15
         // 0.84 = >30.42
         // 0.9 =>?
+        // 13.5 + 1.5 = 15
+        //
 
-        if (downloadtime >= currentpercentile90time) {
-            modifiedpercentile = 0.9 * (speedtest.get("iterations") + 1);
-            newpercentile90time = ((0.9 * newpercentile90time) / modifiedpercentile).toFixed(2);
-        } else {
-            modifiedpercentile = (modifiedpercentile + 1) / (speedtest.get("iterations") + 1);
-            newpercentile90time = ((0.9 * newpercentile90time) / modifiedpercentile).toFixed(2);
+        if (downloadtime >= currentpercentile90time && iterations > 1) {
+            modifiedpercentile = 0.9 * iterations / (iterations - 1);
         }
+
+        newpercentile90time = (((modifiedpercentile * currentpercentile90time) + downloadtime)/2).toFixed(2)
 
         iterresult.medianresponsetime = newmediantime;
         iterresult.percentile90time = newpercentile90time;
